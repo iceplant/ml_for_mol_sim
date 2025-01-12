@@ -139,19 +139,19 @@ def get_batch_dimensions(batch_size, n_particles):
 
 
 def energies_and_forces_model(model, r, z):
-    print("r: ", r.shape, "z: ", z.shape)
+    # print("r: ", r.shape, "z: ", z.shape)
 
-    print(f"Initial r shape: {r.shape}, z shape: {z.shape}")
+    # print(f"Initial r shape: {r.shape}, z shape: {z.shape}")
 
     # r has shape [batch_size, n_particles, 3]
     batch_size, n_particles, _ = r.shape
 
     # Flatten r for the model: [batch_size * n_particles, 3]
-    r = r.view(-1, 3).clone().detach().requires_grad_(True)
+    r = r.view(-1, 3).clone().requires_grad_(True)
 
     # Adjust z shape: [batch_size, n_particles] -> Flatten to [batch_size * n_particles]
     z = z.squeeze(-1).view(-1).unsqueeze(-1)
-    print(f"Adjusted r shape: {r.shape}, z shape: {z.shape}")
+    # print(f"Adjusted r shape: {r.shape}, z shape: {z.shape}")
 
     # Create batch dimensions: [batch_size * n_particles]
     batch_dimensions = get_batch_dimensions(batch_size, n_particles)
@@ -164,6 +164,7 @@ def energies_and_forces_model(model, r, z):
     vec = torch.zeros((n_samples, 1), device=energies.device)
     vec[:, 0] = 1.0
     
+    # print("energies: ", energies)
     # Compute forces by gradient
     forces = -1 * torch.autograd.grad(
         outputs=energies,
@@ -188,6 +189,7 @@ def train(
     rho_ene: float,
     rho_force: float,
     device,
+    scheduler=None
 ):
     """
     Basic training loop for a pytorch model.
@@ -240,7 +242,7 @@ def train(
         # set optimizer to zero grad to remove previous gradients
         optimizer.zero_grad()
 
-        print("positions shape: ", positions.shape, "z shape: ", z.shape)
+        # print("positions shape: ", positions.shape, "z shape: ", z.shape)
 
         # Pass data through the network
         model_energies, model_forces = energies_and_forces_model(model, positions, z)
